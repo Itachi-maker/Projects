@@ -1,0 +1,155 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import java.util.Collections;
+
+public class RiddleGame{
+    private JFrame frame;
+    private JLabel riddleLabel, scoreLabel;
+    private JTextField answerField;
+    private JButton submitButton, hintButton;
+    private String[] riddles = {
+        "I speak without a mouth and hear without ears. I have no body, but I come alive with the wind. What am I?",
+        "The more you take, the more you leave behind. What am I?",
+        "I’m not alive, but I can grow; I don’t have lungs, but I need air; I don’t have a mouth, but water kills me. What am I?",
+        "The person who makes it, sells it. The person who buys it never uses it. The person who uses it never knows they’re using it. What is it?",
+        "The more you remove from me, the bigger I get. What am I?",
+        "What has hands but can’t clap?",
+        "What comes once in a minute, twice in a moment, but never in a thousand years?",
+        "I fly without wings. I cry without eyes. Wherever I go, darkness follows me. What am I?",
+        "What has one eye but can’t see?",
+        "The more of me you take, the more you leave behind. What am I?"
+    };
+    
+    private String[] answers = {
+        "echo", "footsteps", "fire", "coffin", "hole", 
+        "clock", "letter m", "cloud", "needle", "footsteps"
+    };
+    
+    private String[] hints = {
+        "Hint: It reflects sound.", "Hint: Left behind when walking.", 
+        "Hint: Produces heat and light.", "Hint: Used after someone passes away.", 
+        "Hint: Found in the ground.", "Hint: Helps you tell time.", 
+        "Hint: It’s in the word ‘moment’.", "Hint: Floats in the sky.", 
+        "Hint: Used in sewing.", "Hint: Similar to tracks on the ground."
+    };
+
+    private ArrayList<Integer> riddleOrder;
+    private int score = 0, currentIndex = 0, totalRiddles = 10;
+    private String currentAnswer;
+    
+    public RiddleGameGUI() {
+        frame = new JFrame("Riddle Game");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setSize(500, 300);
+        frame.setLayout(new GridBagLayout());
+        frame.getContentPane().setBackground(Color.LIGHT_GRAY);
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridwidth = 2;
+        
+        // Randomize riddles
+        riddleOrder = new ArrayList<>();
+        for (int i = 0; i < riddles.length; i++) {
+            riddleOrder.add(i);
+        }
+        Collections.shuffle(riddleOrder);
+        
+        riddleLabel = new JLabel("<html>" + riddles[riddleOrder.get(currentIndex)] + "</html>", SwingConstants.CENTER);
+        riddleLabel.setPreferredSize(new Dimension(400, 50));
+        riddleLabel.setFont(new Font("Arial", Font.BOLD, 14));
+        gbc.gridy = 0;
+        frame.add(riddleLabel, gbc);
+        
+        answerField = new JTextField(20);
+        gbc.gridy = 1;
+        frame.add(answerField, gbc);
+        
+        submitButton = new JButton("Submit Answer");
+        hintButton = new JButton("Hint");
+        gbc.gridy = 2;
+        gbc.gridwidth = 1;
+        frame.add(submitButton, gbc);
+        
+        gbc.gridx = 1;
+        frame.add(hintButton, gbc);
+        
+        scoreLabel = new JLabel("Score: 0 / " + totalRiddles);
+        gbc.gridx = 0;
+        gbc.gridy = 3;
+        gbc.gridwidth = 2;
+        frame.add(scoreLabel, gbc);
+        
+        currentAnswer = answers[riddleOrder.get(currentIndex)];
+        
+        submitButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                checkAnswer();
+            }
+        });
+
+        hintButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                showHint();
+            }
+        });
+
+        frame.setVisible(true);
+    }
+    
+    private void checkAnswer() {
+        String userAnswer = answerField.getText().trim().toLowerCase();
+        if (userAnswer.equals(currentAnswer)) {
+            JOptionPane.showMessageDialog(frame, "Correct!", "Result", JOptionPane.INFORMATION_MESSAGE);
+            score++;
+        } else {
+            JOptionPane.showMessageDialog(frame, "Wrong! Try again.", "Result", JOptionPane.ERROR_MESSAGE);
+        }
+        
+        currentIndex++;
+        if (currentIndex < totalRiddles) {
+            updateRiddle();
+        } else {
+            endGame();
+        }
+    }
+    
+    private void updateRiddle() {
+        answerField.setText("");
+        riddleLabel.setText("<html>" + riddles[riddleOrder.get(currentIndex)] + "</html>");
+        currentAnswer = answers[riddleOrder.get(currentIndex)];
+        scoreLabel.setText("Score: " + score + " / " + totalRiddles);
+    }
+    
+    private void showHint() {
+        JOptionPane.showMessageDialog(frame, hints[riddleOrder.get(currentIndex)], "Hint", JOptionPane.INFORMATION_MESSAGE);
+    }
+    
+    private void endGame() {
+        String message;
+        double percentage = ((double) score / totalRiddles) * 100;
+        
+        if (percentage < 50) {
+            JOptionPane.showMessageDialog(frame, "You are Stupid!", "Game Over", JOptionPane.ERROR_MESSAGE);
+            message = "Better luck next time!";
+        } else if (percentage < 80) {
+            message = "Good job! You did well!";
+        } else {
+            message = "Excellent! You're a genius!";
+        }
+        
+        JOptionPane.showMessageDialog(frame, "Game Over!\nYour final score: " + score + " / " + totalRiddles + "\n" + message, 
+                                      "Final Score", JOptionPane.INFORMATION_MESSAGE);
+        frame.dispose();
+    }
+    
+    public static void main(String[] args) {
+        new RiddleGameGUI();
+    }
+}
